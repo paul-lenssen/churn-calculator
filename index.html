@@ -46,11 +46,27 @@ button:hover:not(:disabled){opacity:.85;transform:translateY(-1px)}
 .premium{background:linear-gradient(135deg,#0D1929,#0A1628);border:1px dashed #00C89644;border-radius:10px;padding:22px}
 .premium-title{font-size:13px;color:#00C896;font-weight:700;margin-bottom:12px}
 .premium-item{font-size:13px;color:#64748B;margin-bottom:6px;padding-left:16px}
+
+/* EMAIL WALL */
+#emailwall{animation:fadeIn .5s ease}
+.email-wall-card{background:#111827;border:1px solid rgba(0,200,150,0.2);border-radius:12px;padding:48px 36px;text-align:center;max-width:480px;margin:0 auto;position:relative;overflow:hidden}
+.email-wall-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00C896,transparent)}
+.email-wall-icon{font-size:40px;margin-bottom:20px;display:block}
+.email-wall-title{font-size:22px;font-weight:700;color:#F1F5F9;margin-bottom:10px;line-height:1.2}
+.email-wall-sub{font-size:13px;color:#64748B;line-height:1.8;margin-bottom:32px}
+.email-wall-input{background:#0A0F1E;border:1px solid #1F2D40;border-radius:6px;padding:12px 16px;color:#E2E8F0;font-size:14px;font-family:'DM Mono',monospace;outline:none;width:100%;margin-bottom:12px}
+.email-wall-input:focus{border-color:#00C896}
+.email-wall-btn{background:#00C896;color:#0A0F1E;border:none;border-radius:8px;padding:14px 32px;font-size:13px;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:.08em;cursor:pointer;width:100%;transition:opacity .2s}
+.email-wall-btn:hover{opacity:.88}
+.email-wall-note{font-size:11px;color:#64748B;margin-top:12px;line-height:1.6}
+.email-error{color:#FCA5A5;font-size:12px;margin-top:8px;display:none}
+
+#calculator{display:none;animation:fadeIn .5s ease}
 </style>
 </head>
 <body>
 <header>
-  <span class="logo">vreemdevogel.com</span>
+  <a href="https://vreemdevogel.com" style="text-decoration:none"><span class="logo">vreemdevogel.com</span></a>
   <span class="badge">CHURN CALCULATOR</span>
 </header>
 <main>
@@ -58,71 +74,132 @@ button:hover:not(:disabled){opacity:.85;transform:translateY(-1px)}
   <h1>Churn Calculator</h1>
   <p class="subtitle">Voer je klantdata in en krijg direct een AI-analyse van je churnrate, financieel risico en concrete aanbevelingen.</p>
 
-  <div class="card">
-    <div class="card-title">// 01 — Klantdata invoeren</div>
-    <div class="grid">
-      <div class="field"><label>Beginaantal klanten *</label><input id="startKlanten" type="number" placeholder="bijv. 1000"></div>
-      <div class="field"><label>Verloren klanten *</label><input id="verloren" type="number" placeholder="bijv. 45"></div>
-      <div class="field"><label>ARPU (€/maand)</label><input id="arpu" type="number" placeholder="bijv. 49"></div>
-      <div class="field"><label>Periode</label>
-        <select id="periode">
-          <option value="maand">Per maand</option>
-          <option value="kwartaal">Per kwartaal</option>
-          <option value="jaar">Per jaar</option>
-        </select>
-      </div>
-    </div>
-    <div class="grid-2">
-      <div class="field"><label>Sector</label>
-        <select id="sector">
-          <option value="">— optioneel —</option>
-          <option value="energie">Energie</option>
-          <option value="telecom">Telecom</option>
-          <option value="saas">SaaS / Software</option>
-          <option value="retail">Retail / E-commerce</option>
-          <option value="finance">Finance / Verzekering</option>
-          <option value="media">Media / Streaming</option>
-          <option value="anders">Anders</option>
-        </select>
-      </div>
-      <div class="field"><label>Extra context (optioneel)</label><textarea id="context" placeholder="bijv. prijsverhoging, seizoenseffect..."></textarea></div>
+  <!-- EMAIL WALL -->
+  <div id="emailwall">
+    <div class="email-wall-card">
+      <span class="email-wall-icon">🤖</span>
+      <div class="email-wall-title">Gratis toegang tot de<br>AI Churn Calculator</div>
+      <p class="email-wall-sub">Vul je emailadres in voor directe toegang. Je ontvangt ook een notificatie bij nieuwe templates en tools.</p>
+      <input type="email" id="wallEmail" class="email-wall-input" placeholder="jouw@email.nl" autocomplete="email">
+      <div class="email-error" id="emailError">Vul een geldig emailadres in.</div>
+      <button class="email-wall-btn" onclick="submitEmail()">Toegang krijgen →</button>
+      <div class="email-wall-note">✓ Gratis · Geen spam · Uitschrijven kan altijd</div>
     </div>
   </div>
 
-  <div id="metricsCard" style="display:none" class="card">
-    <div class="card-title">// 02 — Berekende metrics</div>
-    <div class="metrics-grid" id="metricsGrid"></div>
-    <button id="analyzeBtn" onclick="analyze()">→ Analyseer met AI</button>
-    <div class="free-note"><span>✓</span> Gratis analyse · Geen account nodig</div>
-  </div>
+  <!-- CALCULATOR (hidden until email submitted) -->
+  <div id="calculator">
+    <div class="card">
+      <div class="card-title">// 01 — Klantdata invoeren</div>
+      <div class="grid">
+        <div class="field"><label>Beginaantal klanten *</label><input id="startKlanten" type="number" placeholder="bijv. 1000"></div>
+        <div class="field"><label>Verloren klanten *</label><input id="verloren" type="number" placeholder="bijv. 45"></div>
+        <div class="field"><label>ARPU (€/maand)</label><input id="arpu" type="number" placeholder="bijv. 49"></div>
+        <div class="field"><label>Periode</label>
+          <select id="periode">
+            <option value="maand">Per maand</option>
+            <option value="kwartaal">Per kwartaal</option>
+            <option value="jaar">Per jaar</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label>Sector</label>
+          <select id="sector">
+            <option value="">— optioneel —</option>
+            <option value="energie">Energie</option>
+            <option value="telecom">Telecom</option>
+            <option value="saas">SaaS / Software</option>
+            <option value="retail">Retail / E-commerce</option>
+            <option value="finance">Finance / Verzekering</option>
+            <option value="media">Media / Streaming</option>
+            <option value="anders">Anders</option>
+          </select>
+        </div>
+        <div class="field"><label>Extra context (optioneel)</label><textarea id="context" placeholder="bijv. prijsverhoging, seizoenseffect..."></textarea></div>
+      </div>
+    </div>
 
-  <div id="loading" style="display:none" class="loading">
-    <div class="dot" style="animation-delay:0s"></div>
-    <div class="dot" style="animation-delay:.2s"></div>
-    <div class="dot" style="animation-delay:.4s"></div>
-    <span class="loading-text">AI analyseert je data...</span>
-  </div>
+    <div id="metricsCard" style="display:none" class="card">
+      <div class="card-title">// 02 — Berekende metrics</div>
+      <div class="metrics-grid" id="metricsGrid"></div>
+      <button id="analyzeBtn" onclick="analyze()">→ Analyseer met AI</button>
+      <div class="free-note"><span>✓</span> Gratis analyse · Geen account nodig</div>
+    </div>
 
-  <div id="error" style="display:none" class="error"></div>
+    <div id="loading" style="display:none" class="loading">
+      <div class="dot" style="animation-delay:0s"></div>
+      <div class="dot" style="animation-delay:.2s"></div>
+      <div class="dot" style="animation-delay:.4s"></div>
+      <span class="loading-text">AI analyseert je data...</span>
+    </div>
 
-  <div id="result" style="display:none" class="result">
-    <div class="result-glow"></div>
-    <div class="card-title">// 03 — AI Analyse</div>
-    <p class="result-text" id="resultText"></p>
-    <div class="divider"></div>
-    <div class="premium">
-      <div class="premium-title">🔒 Premium — binnenkort via vreemdevogel.com</div>
-      <div class="premium-item">— Meerdere segmenten vergelijken in één analyse</div>
-      <div class="premium-item">— Cohort survival visualisatie per klantsegment</div>
-      <div class="premium-item">— NPV/ROI berekening van een retentiemaatregel</div>
-      <div class="premium-item">— Export als PDF-rapport of PowerPoint-slide</div>
-      <div class="premium-item">— Maandelijkse rapportage op basis van jouw data</div>
+    <div id="error" style="display:none" class="error"></div>
+
+    <div id="result" style="display:none" class="result">
+      <div class="result-glow"></div>
+      <div class="card-title">// 03 — AI Analyse</div>
+      <p class="result-text" id="resultText"></p>
+      <div class="divider"></div>
+      <div class="premium">
+        <div class="premium-title">🔒 Premium — binnenkort via vreemdevogel.com</div>
+        <div class="premium-item">— Meerdere segmenten vergelijken in één analyse</div>
+        <div class="premium-item">— Cohort survival visualisatie per klantsegment</div>
+        <div class="premium-item">— NPV/ROI berekening van een retentiemaatregel</div>
+        <div class="premium-item">— Export als PDF-rapport of PowerPoint-slide</div>
+        <div class="premium-item">— Maandelijkse rapportage op basis van jouw data</div>
+      </div>
     </div>
   </div>
 </main>
+
 <script>
+  // Check if already unlocked
+  if (localStorage.getItem('vv_email_unlocked')) {
+    document.getElementById('emailwall').style.display = 'none';
+    document.getElementById('calculator').style.display = 'block';
+  }
+
+  function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function submitEmail() {
+    const email = document.getElementById('wallEmail').value.trim();
+    const errorEl = document.getElementById('emailError');
+
+    if (!isValidEmail(email)) {
+      errorEl.style.display = 'block';
+      return;
+    }
+    errorEl.style.display = 'none';
+
+    // Submit to Mailchimp
+    const url = 'https://vreemdevogel.us6.list-manage.com/subscribe/post?u=ab4dd18018bf1b2b5c51dae22&id=144fd472a0&f_id=006b34e1f0';
+    const data = new FormData();
+    data.append('EMAIL', email);
+    data.append('b_ab4dd18018bf1b2b5c51dae22_144fd472a0', '');
+
+    fetch(url, { method: 'POST', body: data, mode: 'no-cors' });
+
+    // Unlock calculator
+    localStorage.setItem('vv_email_unlocked', '1');
+    document.getElementById('emailwall').style.display = 'none';
+    document.getElementById('calculator').style.display = 'block';
+  }
+
+  // Enter key support
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && document.getElementById('emailwall').style.display !== 'none') {
+      submitEmail();
+    }
+  });
+
   const inputs = ['startKlanten','verloren','arpu','periode','sector','context'];
-  inputs.forEach(id => document.getElementById(id).addEventListener('input', updateMetrics));
+  inputs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', updateMetrics);
+  });
 
   function updateMetrics() {
     const start = parseFloat(document.getElementById('startKlanten').value) || 0;
